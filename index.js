@@ -3,7 +3,7 @@
 // get those modules
 
 Botkit = require('botkit');
-user = require('./lib/user');
+newuser = require('./lib/user');
 town = require('./town');
 tavern = require('./tavern');
 woods = require('./woods');
@@ -14,12 +14,14 @@ smith = require('./smith');
 abbey = require('./abbey');
 items = require('./lib/items');
 levs = require('./lib/levels');
+events = require('./lib/events');
 utility = require('./utility');
 beasts = require('./lib/beasts');
 
 // KEY PLAYER VARIABLES
 
-var reply, reply2, input, userid, msg;
+var username, currentuser, userid, msg;
+user={};
 globalfortune=0;
 batpoints=0;
 shieldflag=false;
@@ -32,24 +34,17 @@ drinkvar=false;
 channel=undefined;
 aturns=0;
 missioncomplete=false;
+hearings="";
+sessionevents={
+    minor:[],
+    majorflag:false,
+    major:[],
+    tobesaved:""
+};
 
 //////////////////////////////////////
 
 // boring stuff
-
-// function onInstallation(bot, installer) {
-//     if (installer) {
-//         bot.startPrivateConversation({user: installer}, function (err, convo) {
-//             if (err) {
-//                 console.log(err);
-//             } else {
-//                 convo.say('I am a bot that has just joined your team');
-//                 convo.say('You must now /invite me to a channel so that I can be of use!');
-//             }
-//         });
-//     }
-// }
-
 // initialization
 
 var config = {};
@@ -146,7 +141,7 @@ controller.on('rtm_close', function (bot) {
 
 controller.on('bot_channel_join', function (bot, message) {
     console.log("channel join");
-    bot.reply(message, "Thanks for inviting me to the channel! I'll give more instructions later.");
+    bot.reply(message, "Thanks for inviting me to the channel!");
 });
 
 controller.on('mention', function (bot,message) {
@@ -156,7 +151,9 @@ controller.on('mention', function (bot,message) {
 
 controller.on('direct_message', function (bot, message) {
 
-    user.userid = message.user;
+    utility.reboot();
+    userid = message.user;
+    user.userid = userid;
     team = message.team;
 
     // welcome function
@@ -193,30 +190,31 @@ controller.on('direct_message', function (bot, message) {
     };
 
     // get user collection; check knownPlayer flag; if none, set basic info
-    controller.storage.users.get(user.userid, function(err,user_data){
+    controller.storage.users.get(userid, function(err,user_data){
         if (err) console.log("err: " + err);
         console.log("user.userid: " + user.userid);
-        var temp = user_data;
-        if (temp===undefined || temp===null){
+        if (user_data===undefined || user_data===null || user_data.user.username===undefined){
             // no record for this user, so we'll set one up
-            user.knownPlayer = false
             console.log("this is not a known player");
+            user = newuser.newPlayer;
+            user.userid = userid;
+            user.knownPlayer = false;
             // grab some deets real quick, saves to user var
             bot.api.users.info({'user':user.userid},function(err,res){
                 user.username = res.user.name;
-                controller.storage.users.save({id: user.userid, user:user}, function(err,res){
+                console.log("user.username: " + user.username);
+                controller.storage.users.save({id: userid, user:user}, function(err,res){
                     if (err) console.log("err: " + err);
                     else console.log("res: " + res);
                 });
             });
         } else {
+            console.log("found a record for username: " + user_data.user.username);
             // found a record for user
-            console.log("found a record!");
-            user = temp.user
+            user = user_data.user;
             if (user.drinkflag===true){
                 drinkvar=true;
             }
-            console.log("user.username: " + user.username);
         }
     });
 
@@ -245,7 +243,7 @@ enter = function(res, convo){
     convo.say("You're walking down a dirt path. It's nighttime, and cool out. The crickets are chirping around you. There's a soft light up ahead. As you get a little closer, the yellow light of a small country inn beckons. \n\nYou open the small metal gate and walk into the inn's yard. There are torches about lighting the way, and the sound of voices talking and laughing inside.");
     convo.say("As you enter, The Innkeeper looks up from where he's clearing a table.");
     if (!user.knownPlayer){
-        console.log("this is a new player");
+        console.log("setting up new player: " + user.username);
         convo.ask("The Innkeeper grunts. \n>Well met, *" + user.username + "*. Haven't seen you around here before. You mean to introduce yourself, and begin your adventure in Coneshire?", [
         {
             pattern: convo.task.bot.utterances.yes,
@@ -289,18 +287,14 @@ enter = function(res, convo){
 newplayer = function(res,convo){
     convo.say("The Innkeeper smacks the long bench with his palm and grins. \n>Excellent! I wish you luck and good fortune on your journies to come in the village of Coneshire - and the lands beyond... \n>As a last step before you go, you may choose to add 1 point to any of your four key character attributes. Which do you choose?");
     convo.ask("`Charisma`: this will help you get along with other characters. \n`Luck`: this will grant you good fortune. \n`Mysticism`: this will build your mental fortitude. \n`Strength`: this will make you more powerful in combat.", function(res,convo){
-            controller.storage.users.save({id: userid, user:user}, function(err,res){
-                if (err) console.log("err: " + err);
-                else console.log("res: " + res);
-                utility.dailyreboot();
                 newplayer2(res,convo);
                 convo.next();
-            });
     });
 }
 
 newplayer2 = function(res,convo){
     var temp = res.text.toLowerCase();
+    sessionevents.major.push("newplayer");
     if (temp.includes("charisma")){
         user.attributes.charisma += 1;
         convo.say(">Outstanding! You are now wittier, funnier and more fun to be around!");
@@ -338,6 +332,7 @@ newplayer2 = function(res,convo){
 enter2 = function(res,convo){
     // instructions or town
     var temp = res.text.toLowerCase();
+    user.knownPlayer = true;
     if (temp==="instructions"){
         convo.ask("The Innkeeper nods his head. \n>Okay then. You probably lots of questions. What topic would you like explained? Let me pour you some ale, and I'll explain concepts like the `village` of Coneshire, `fighting`, Buying/using `merchandise`, interacting with `townsfolk` or other `wanderers`, `magick` or general `concepts`. Or you can just `continue` on to the Village of Coneshire.\"", function(res, convo){
             instructions(res,convo);
@@ -349,7 +344,12 @@ enter2 = function(res,convo){
         convo.say(">Good luck then, wanderer. You'll need it.\"");
         convo.say("You exit the inn. Leaving its warm light behind, you continue down the dirt path, the first shoots of sunlight beginning to break through the trees. Soon, you come upon the Village of Coneshire.");
         quicksave();
+        crierfetch();
         town.townsquare(res, convo);
+    // } 
+    // else if (temp==="test") {
+    //     convo.say("Okay, we're gonna try something");
+    //     town.townsquare(res,convo);
     } else {
         convo.repeat();
     }
@@ -406,6 +406,7 @@ instructions = function(res,convo){
         });
     } else if (temp.includes('continue')) {
         // go on to town
+        crierfetch();
         convo.say("\"Good luck, wanderer. You'll need it.\"");
         convo.say("You exit the inn. Leaving its warm light behind, you continue down the dirt path, the first shoots of sunlight beginning to break through the trees. Soon, you come upon the Village of Coneshire.");
         town.townsquare(res, convo);
@@ -421,8 +422,10 @@ instructions = function(res,convo){
 }
 
 quit = function(res,convo){
-    quicksave();
     var temp = res.text.toLowerCase();
+    quicksave();
+    console.log("user quit: " + user.username);
+    utility.eventbus();
     convo.say("*-------------------------------------T H E  F I E L D S-------------------------------------*");
     convo.say("You make camp for the night and settle in.");
     convo.say("*See you tomorrow, fellow wanderer.*");
@@ -431,6 +434,8 @@ quit = function(res,convo){
 
 death = function(res,convo){
     var temp = res.text.toLowerCase();
+    console.log("user death: " + user.username);
+    sessionevents.major.push("death");
     convo.say("*-----------------------------------------D E A T H-----------------------------------------*");
     convo.say("_You are dead._ \n_Don't worry - it won't last long._");
     var temp = Math.random();
@@ -442,6 +447,7 @@ death = function(res,convo){
         user.gold = 0;
     }
     quicksave();
+    // utility.eventbus();
     convo.say("When you come to, you are back at the country inn outside of town. Everything is a bit hazy. \nYou go inside. The Innkeeper is still there, and as he sees you stagger in, he beckons you over and helps you down on to a bench. Your muscles ache. Your head throbs. \n>Looks like you had a bad encounter with that forest beast! No shame in that, *" + user.username + "*. It's happened to all of us. You'll be back in the action tomorrow. For now, sit a spell. Have a drink. \nHe plops a tankard of frothy ale down in front of you, and the pounding in your head begins to subside. You decide to get comfortable.");
     convo.say("Better luck tomorrow. *See you soon, fellow wanderer.*");
     convo.next();
@@ -458,9 +464,23 @@ grabAllNames = function(x,y){
 }
 
 quicksave = function(){
-    controller.storage.users.save({id: user.userid, user:user}, function(err,res){
+    controller.storage.users.save({id: userid, user:user}, function(err,res){
         console.log("user save");
         if (err) console.log("save err: " + err);
+    });
+}
+
+eventsave = function(){
+    var temp = utility.todaysdate();
+    controller.storage.activity.get(temp, function(err,res){
+        if (err) console.log("event get err: " + err);
+        else console.log("adding to day's activity record");
+        var temp2 = res.activity;
+        temp2 += sessionevents.tobesaved;
+        controller.storage.activity.save({id:temp, activity:temp2}, function(err){
+            if (err) console.log("event save err: " + err);
+            else console.log("event save success");
+        }); 
     });
 }
 
@@ -468,11 +488,13 @@ savedrink = function(drinkobject){
     controller.storage.users.all(function(err, all_user_data) {
         for (i=0;i<all_user_data.length;i++){
             if (all_user_data[i].user.username===drinkobject.to) {
-                var temp = all_user_data[i].user.user_id;
+                var temp = all_user_data[i].user.userid;
                 console.log("target userid: " + temp);
                 controller.storage.users.get(temp, function(err,user_data){
+                    console.log("grabbed username: " + user_data.user.username)
                     var targetData = user_data.user;
                     targetData.drinks.recd.push(drinkobject);
+                    targetData.drinkflag = true;
                     controller.storage.users.save({id: temp, user:targetData},function(err,res){
                         if (err) console.log("err: " + err);
                         else console.log("target data saved");
@@ -485,49 +507,33 @@ savedrink = function(drinkobject){
     });
 }
 
-status = function(){
-    return ("Your current status: \n```Hitpoints: " + user.hp + "   Level: " + user.level.name + "\n" +
-        "Gold: " + user.gold + "        Experience: " + user.xp + "\n" +
-        "Weapon: " + user.items.weapon.name + "   Armor: " + user.items.armor.name + "\n" +
-        "Magicks: " + ifmagic() + "\n" +
-        "Attributes: Charisma (" + user.attributes.luck + ") Mysticism (" + user.attributes.myst + ") Luck (" + user.attributes.luck + ") Strength (" + user.attributes.strength + ")\n" + 
-        "Battle turns remaining today: " + user.turnsToday + "```");
-}
-
-ifmagic = function(){
-    if (user.items.magic.length===0){
-        return ("none")
-    } else {
-        var temp = "";
-        for (i=0;i<user.items.magic.length;i++){
-            temp += user.items.magic[i].name + ", ";
+crierfetch = function(){
+    var temp = utility.todaysdate();
+    controller.storage.activity.get(temp, function(err,res){
+        if (err) console.log("activity get err: " + err);
+        else if (res===null) {            
+            // it's a new day - nothing here yet
+            console.log("No activity log yet today - populating");
+            var placetemp = "place" + Math.round(Math.random()*3)
+            sessionevents.tobesaved += events.eventReturner(placetemp);
+            var temp2 = sessionevents.tobesaved;
+            controller.storage.activity.save({id:temp, activity:temp2}, function(err){
+                if (err) console.log("event save err: " + err);
+                else console.log("event save success");
+                hearings = temp2
+            });
         }
-        temp += "and ephemeral bits.";
-        return temp;
-    }
-}
-
-showmagic = function(x){
-    var returnvar = "You have knowledge of the following magicks:\n";
-        for (i=0;i<user.items.magic.length;i++){
-            returnvar += "   " + user.items.magic[i].name + ": " + user.items.magic[i].desc + "\n";
+        else {
+            // grab today's activity
+            console.log("activity res: " + res.activity);
+            hearings += res.activity;
         }
-    returnvar += "\n";
-    return returnvar
+    });
 }
-
 
 // known bugs:
 // - tavern minstrel true/false var is not persistent; restarting game resets the var
-// - there's gotta be a better way of collecting all usernames for display, but asynch wasn't my friend
 // - gotta add stalking for lev 2s at bar
 // 
-
-
-// grab some deets real quick
-// bot.api.users.info({'user':userid},function(err,res){
-// user.name = res.user.name;
-// user.email = res.user.profile.email;
-// controller.storage.users.save({id: userid, user});
 
 
