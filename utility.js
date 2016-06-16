@@ -49,6 +49,8 @@ module.exports = {
 			user.hp = levs.levels.apprentice.maxhp;
 			user.mission = "";
 			missioncomplete = undefined;
+			sessionevents.majorflag=true;
+			sessionevents.major.push("lev2");
 		} else if (x===3){
 			user.level = levs.levels.challenger;
 			user.hp = levs.levels.challenger.maxhp
@@ -62,8 +64,6 @@ module.exports = {
 	},
 
 	dailyreboot: function(){
-		var date = new Date();
-		var today = date.getDate(); 
 		if(user.lastPlayed != today){
 			// user did not play today, so get 'em going with full hp & turns again
 			user.hp = user.level.maxhp;
@@ -77,6 +77,33 @@ module.exports = {
 		} else {
 			// user played today, isn't dead yet, may/may not have turns left
 			return 1;
+		}
+	},
+
+	reboot: function(){
+		username=undefined;
+		currentuser=undefined;
+		userid=undefined;
+		msg=undefined;
+		user={};
+		globalfortune=0;
+		batpoints=0;
+		shieldflag=false;
+		swordflag=false;
+		gran = true;
+		currentmerch = undefined;
+		allNames = "";
+		stew = false;
+		drinkvar=false;
+		channel=undefined;
+		aturns=0;
+		missioncomplete=false;
+		hearings="";
+		sessionevents={
+		    minor:[],
+		    majorflag:false,
+		    major:[],
+		    tobesaved:""
 		}
 	},
 
@@ -121,8 +148,84 @@ module.exports = {
 	    returnvar += "and a bit of dust.\n";
 	    return returnvar;
 	    }
-	}
+	},
 
+	todaysdate: function(x){
+		var date = new Date();
+		var month = date.getMonth() + 1;
+		var day = date.getDate(); 
+		var monthday = month + "-" + day;
+		if (x==="day"){
+			// returns just day
+			return day
+		} else {
+			// returns MM-DD format
+			return monthday
+		}
+	},
+
+	ifmagic: function(){
+	    if (user.items.magic.length===0){
+	        return ("none")
+	    } else {
+	        var temp = "";
+	        for (i=0;i<user.items.magic.length;i++){
+	            temp += user.items.magic[i].name + ", ";
+	        }
+	        temp += "and ephemeral bits.";
+	        return temp;
+	    }
+	},
+
+	showmagic: function(x){
+	    var returnvar = "You have knowledge of the following magicks:\n";
+	        for (i=0;i<user.items.magic.length;i++){
+	            returnvar += "   " + user.items.magic[i].name + ": " + user.items.magic[i].desc + "\n";
+	        }
+	    returnvar += "\n";
+	    return returnvar
+	},
+
+	status: function(){
+    return ("Your current status: \n```Hitpoints: " + user.hp + "   Level: " + user.level.name + "\n" +
+        "Gold: " + user.gold + "        Experience: " + user.xp + "\n" +
+        "Weapon: " + user.items.weapon.name + "   Armor: " + user.items.armor.name + "\n" +
+        "Magicks: " + utility.ifmagic() + "\n" +
+        "Attributes: Charisma (" + user.attributes.charisma + ") Mysticism (" + user.attributes.myst + ") Luck (" + user.attributes.luck + ") Strength (" + user.attributes.strength + ")\n" + 
+        "Battle turns remaining today: " + user.turnsToday + "```");
+	},
+
+	eventbus: function(x){
+		var temp = "";
+		if (sessionevents.major.length>0){
+	        for (i=0;i<sessionevents.major.length;i++){
+	        	var temp2 = sessionevents.major[i];
+	        	temp += events.eventReturner(temp2);
+	        }
+			sessionevents.tobesaved += temp;
+		}
+		if (sessionevents.minor.length>0){
+			if (sessionevents.minor.length===1){
+				console.log("eventbus just 1 event");
+				// pick up event 
+				var temp2 = sessionevents.minor[0];
+				// pick up event description
+		        temp += events.eventReturner(temp2);
+			} else {
+				console.log("eventbus >1 event");
+				// pick a minor event at random
+				var temp2 = Math.round(Math.random() * (sessionevents.minor.length-1) );
+				// pick up event
+				var temp3 = sessionevents.minor[temp2]
+		        temp += events.eventReturner(temp3);
+			}
+		}
+		sessionevents.tobesaved += temp;
+		console.log("sessionevents.tobesaved: " + sessionevents.tobesaved);
+		eventsave();
+	}
+		// town, tavern, smither, smithbuy, apot, bank, abbey, farm, asking
+		// lev2, magic, newplayer, death
 }
 
 

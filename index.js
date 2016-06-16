@@ -41,6 +41,7 @@ sessionevents={
     major:[],
     tobesaved:""
 };
+today=0;
 
 //////////////////////////////////////
 
@@ -72,7 +73,7 @@ controller.setupWebserver(process.env.PORT,function(err,webserver) {
     if (err) {
       res.status(500).send('ERROR: ' + err);
     } else {
-      res.send('Success!');
+      res.send('Success! Hurrah! Look for a new DM in your Slack team.');
     }
   });
 });
@@ -155,6 +156,7 @@ controller.on('direct_message', function (bot, message) {
     userid = message.user;
     user.userid = userid;
     team = message.team;
+    today = utility.todaysdate("day");
 
     // welcome function
     welcome = function(res,convo){
@@ -198,12 +200,12 @@ controller.on('direct_message', function (bot, message) {
             console.log("this is not a known player");
             user = newuser.newPlayer;
             user.userid = userid;
-            user.knownPlayer = false;
             drinkvar=true;
-            // grab some deets real quick, saves to user var
+
+            // grab some user deets real quick, saves to user var
             bot.api.users.info({'user':user.userid},function(err,res){
                 user.username = res.user.name;
-                console.log("user.username: " + user.username);
+                console.log("new user username: " + user.username + " (startup)");
                 controller.storage.users.save({id: userid, user:user}, function(err,res){
                     if (err) console.log("err: " + err);
                     else console.log("res: " + res);
@@ -231,15 +233,16 @@ controller.on('direct_message', function (bot, message) {
 
 });
 
-controller.hears('stop',['direct_message'],function(bot,message){
+// controller.hears('stop',['direct_message'],function(bot,message){
 
-    bot.startConversation(message, function(err,convo){
-        convo.say("🚨Yikes!🚨 We're going to try to stop this conversation now.");
-        convo.stop();
-    });
-});
+//     bot.startConversation(message, function(err,convo){
+//         convo.say("🚨Yikes!🚨 We're going to try to stop this conversation now.");
+//         convo.stop();
+//     });
+// });
 
 enter = function(res, convo){
+    user.lastPlayed = today;
     convo.say("Great! Let's go! 🐲");
     convo.say("You're walking down a dirt path. It's nighttime, and cool out. The crickets are chirping around you. There's a soft light up ahead. As you get a little closer, the yellow light of a small country inn beckons. \n\nYou open the small metal gate and walk into the inn's yard. There are torches about lighting the way, and the sound of voices talking and laughing inside.");
     convo.say("As you enter, The Innkeeper looks up from where he's clearing a table.");
@@ -271,12 +274,13 @@ enter = function(res, convo){
         ]);
     } else {
         // known user continuing their quest
-        console.log("this is a returning player");
         var temp = utility.dailyreboot();
         if (temp===2){
+            console.log("player returned but is dead");
             convo.say("You remain dead. But don't worry - try back tomorrow!");
             convo.next();
         } else {
+            console.log("player reboot");
             convo.ask(">*Well met, " + user.username + "!* Good to see you again. Would you care to hear some `instructions`? Or just continue on to `town`?", function(response,convo){
             enter2(response,convo);
             convo.next();
@@ -286,6 +290,9 @@ enter = function(res, convo){
 }
 
 newplayer = function(res,convo){
+    user.knownPlayer = true;
+    user.profileStarted = today;
+    user.logins++;
     convo.say("The Innkeeper smacks the long bench with his palm and grins. \n>Excellent! I wish you luck and good fortune on your journies to come in the village of Coneshire - and the lands beyond... \n>As a last step before you go, you may choose to add 1 point to any of your four key character attributes. Which do you choose?");
     convo.ask("`Charisma`: this will help you get along with other characters. \n`Luck`: this will grant you good fortune. \n`Mysticism`: this will build your mental fortitude. \n`Strength`: this will make you more powerful in combat.", function(res,convo){
                 newplayer2(res,convo);
@@ -333,7 +340,6 @@ newplayer2 = function(res,convo){
 enter2 = function(res,convo){
     // instructions or town
     var temp = res.text.toLowerCase();
-    user.knownPlayer = true;
     if (temp==="instructions"){
         convo.ask("The Innkeeper nods his head. \n>Okay then. You probably lots of questions. What topic would you like explained? Let me pour you some ale, and I'll explain concepts like the `village` of Coneshire, `fighting`, Buying/using `merchandise`, interacting with `townsfolk` or other `wanderers`, `magick` or general `concepts`. Or you can just `continue` on to the Village of Coneshire.\"", function(res, convo){
             instructions(res,convo);
@@ -341,16 +347,13 @@ enter2 = function(res,convo){
     });
     } else if (temp==="town"){
         // go on to town
-        user.knownPlayer = true;
         convo.say(">Good luck then, wanderer. You'll need it.\"");
         convo.say("You exit the inn. Leaving its warm light behind, you continue down the dirt path, the first shoots of sunlight beginning to break through the trees. Soon, you come upon the Village of Coneshire.");
         quicksave();
+        // game lists: crierfetch gets list of daily activity, graballnames gets all user names
         crierfetch();
+        grabAllNames();
         town.townsquare(res, convo);
-    // } 
-    // else if (temp==="test") {
-    //     convo.say("Okay, we're gonna try something");
-    //     town.townsquare(res,convo);
     } else {
         convo.repeat();
     }
@@ -408,6 +411,7 @@ instructions = function(res,convo){
     } else if (temp.includes('continue')) {
         // go on to town
         crierfetch();
+        grabAllNames();
         convo.say("\"Good luck, wanderer. You'll need it.\"");
         convo.say("You exit the inn. Leaving its warm light behind, you continue down the dirt path, the first shoots of sunlight beginning to break through the trees. Soon, you come upon the Village of Coneshire.");
         town.townsquare(res, convo);
@@ -475,42 +479,24 @@ eventsave = function(){
     var temp = utility.todaysdate();
     controller.storage.activity.get(temp, function(err,res){
         if (err) console.log("event get err: " + err);
-        else console.log("adding to day's activity record");
-        var temp2 = res.activity;
-        temp2 += sessionevents.tobesaved;
-        controller.storage.activity.save({id:temp, activity:temp2}, function(err){
-            if (err) console.log("event save err: " + err);
-            else console.log("event save success");
-        }); 
-    });       
-
-    // controller.storage.activity.get(temp, function(err,res){
-    //     if (err) console.log("event get err: " + err);
-    //     else if (res===null || res===undefined) {
-    //         console.log("no activity record yet");
-    //         // it's a new day - nothing here yet
-    //         // start array and put something in it
-    //         var placetemp = "place" + Math.round(Math.random()*3)
-    //         sessionevents.tobesaved += events.minor[placetemp];
-    //         var temp2 = sessionevents.tobesaved
-    //         controller.storage.activity.save({id:temp, activity:temp2}, function(err){
-    //             if (err) console.log("event save err: " + err);
-    //             else console.log("event save success");
-    //         });
-    //     } else {
-    //         console.log("adding to day's activity record");
-    //         // adding to the day's events
-    //         // push stuff to an array here
-    //         // push to res, which is an events array
-    //         console.log("res.activity: " + res.activity);
-    //         var temp2 = res.activity;
-    //         temp2 += sessionevents.tobesaved;
-    //         controller.storage.activity.save({id:temp, activity:temp2}, function(err){
-    //             if (err) console.log("event save err: " + err);
-    //             else console.log("event save success");
-    //         });
-    //     }
-    // });
+        if (res===null){
+            console.log("No record found, but we caught it...");
+            console.log("NOW adding to day's activity record");
+            var temp2 = sessionevents.tobesaved;
+            controller.storage.activity.save({id:temp, activity:temp2}, function(err){
+                if (err) console.log("event save err: " + err);
+                else console.log("event save success");
+            }); 
+        } else {
+            console.log("appending to day's existing activity record");
+            var temp2 = res.activity;
+            temp2 += sessionevents.tobesaved;
+            controller.storage.activity.save({id:temp, activity:temp2}, function(err){
+                if (err) console.log("event save err: " + err);
+                else console.log("event save success");
+            }); 
+        }
+    });
 }
 
 savedrink = function(drinkobject){
@@ -518,15 +504,13 @@ savedrink = function(drinkobject){
         for (i=0;i<all_user_data.length;i++){
             if (all_user_data[i].user.username===drinkobject.to) {
                 var temp = all_user_data[i].user.userid;
-                console.log("target userid: " + temp);
                 controller.storage.users.get(temp, function(err,user_data){
-                    console.log("grabbed username: " + user_data.user.username)
                     var targetData = user_data.user;
                     targetData.drinks.recd.push(drinkobject);
                     targetData.drinkflag = true;
                     controller.storage.users.save({id: temp, user:targetData},function(err,res){
                         if (err) console.log("err: " + err);
-                        else console.log("target data saved");
+                        else console.log("target data saved (savedrink)");
                         user.drinks.sent.push(drinkobject);
                         quicksave();
                     });
@@ -551,6 +535,7 @@ crierfetch = function(){
                 else console.log("event save success");
                 hearings = temp2
             });
+            sessionevents.tobesaved = "";
         }
         else {
             // grab today's activity
