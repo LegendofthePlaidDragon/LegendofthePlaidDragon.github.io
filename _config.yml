@@ -1,0 +1,8 @@
+title: Legend of the Plaid Dragon
+description: Several people are slaying... 🐲 ⚔ 💰
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-tactile
+
+gems:
+  - jekyll-mentions
