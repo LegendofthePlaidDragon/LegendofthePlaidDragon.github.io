@@ -1,4 +1,4 @@
-###Welcome to Legend of the Plaid Dragon.
+<h1>Welcome to Legend of the Plaid Dragon.</h1>
 
 Smoke emerges from the mountain. Something has awoken. Check back soon.
 
