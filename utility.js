@@ -7,7 +7,7 @@ module.exports = {
 	items: function(x){
 		var temp2;
 		if (x === "Healing elixir"){
-			console.log("item use: healing elixir");
+			console.log("(" + user.username + ") (" + user.username + ") item use: healing elixir");
 			if (user.hp + items.heals.basic.potency > user.level.maxhp){
 				user.hp = user.level.maxhp;
 			} else {
@@ -15,7 +15,7 @@ module.exports = {
 			}
 			return "You uncork Morgan's " + items.heals.basic.name + " and swill it all. You feel stronger already!";
 		} else if (x === "Extra potent healing elixir"){
-			console.log("item use: potent healing elixir");
+			console.log("(" + user.username + ") (" + user.username + ") item use: potent healing elixir");
 			if (user.hp + items.heals.potent.potency > user.level.maxhp){
 				user.hp = user.level.maxhp;
 			} else {
@@ -31,12 +31,12 @@ module.exports = {
 			return "You can't use that here.";
 			// var temp = user.items.other.splice(i,1);
 		} else if (x === "Innoculated kola nuts"){
-			console.log("item use: kola");
+			console.log("(" + user.username + ") (" + user.username + ") item use: kola");
 			user.turnsToday += 5;
 			user.drugs += 1;
 			return "You take a handful of Morgan's special kola nuts and crunch down on them. The bitterness almost makes you gag. \nYou are energized! Five turns are added to your daily limit!";
 		} else if (x === "Berserker infusion"){
-			console.log("item use: berserker");
+			console.log("(" + user.username + ") (" + user.username + ") item use: berserker");
 			batpoints = 5;
 			user.drugs += 2; 
 			return "Steadying yourself, you gulp down the vial of Morgan's Berserker infusion. It burns going down. \nYou feel the strength of ten men, and crave battle!";
@@ -44,23 +44,60 @@ module.exports = {
 	},
 
 	levelup: function(x){
+		// game-wide function for leveling up a player
 		if (x===2){
+			// Abbey completed - Level 2
 			user.level = levs.levels.apprentice;
 			user.hp = levs.levels.apprentice.maxhp;
 			user.mission = "";
-			missioncomplete = undefined;
+      user.missionname = "None";
+			missioncomplete = false;
 			sessionevents.majorflag=true;
 			sessionevents.major.push("lev2");
 		} else if (x===3){
+			// Grannon completed - Level 3
 			user.level = levs.levels.challenger;
-			user.hp = levs.levels.challenger.maxhp
+			user.hp = levs.levels.challenger.maxhp;
+      missioncomplete=false
+      user.mission = "";
+      user.missionname="None";
 		} else if (x===4){
+			// Royale completed - Level 4
 			user.level = levs.levels.journeyman;
 			user.hp = levs.levels.journeyman.maxhp
+      missioncomplete=false
+      user.mission = "";
+      user.missionname="None";
+      console.log("levelup4 fires");
 		} else if (x===5){
-			user.level = levs.levels.ranger;
-			user.hp = levs.levels.ranger.maxhp
-		}
+			// Morgan's errand completed - Level 5
+			user.level = levs.levels.rogue;
+			user.hp = levs.levels.rogue.maxhp
+      missioncomplete=false
+      user.mission = "";
+      user.missionname="None";
+      console.log("levelup4 fires");
+		} else if (x===6){
+			// Abbey dark mission completed - Level 6
+			user.level = levs.levels.corsair;
+			user.hp = levs.levels.corsair.maxhp
+		} else if (x===7){
+			// Rolf's drugs completed - Level 7
+			user.level = levs.levels.sensei;
+			user.hp = levs.levels.sensei.maxhp
+		} else if (x===8){
+			// Pestilence completed - Level 8
+			user.level = levs.levels.mchief;
+			user.hp = levs.levels.mchief.maxhp
+		} else if (x===9){
+			// bank break-in completed - Level 9
+			user.level = levs.levels.ronin;
+			user.hp = levs.levels.ronin.maxhp
+		} else if (x===10){
+			// minstrel completed - Level 10
+			user.level = levs.levels.wanderer;
+			user.hp = levs.levels.wanderer.maxhp
+		} 
 	},
 
 	dailyreboot: function(){
@@ -69,9 +106,10 @@ module.exports = {
 			user.hp = user.level.maxhp;
 			user.turnsToday = 20;
 			user.lastPlayed = today;
-			user.logins++
+      console.log("(" + user.username + ") successful reboot");
 			return 1; 
 		} else if (user.hp <= 0) {
+			console.log("(" + user.username + ") player is dead");
 			// user is dead
 			return 2;
 		} else {
@@ -113,26 +151,30 @@ module.exports = {
 			if (user.attributes.luck!=0){
 				temp += user.attributes.luck * 0.1;
 			}
-			console.log("luck var: " + temp);
+			console.log("(" + user.username + ") luck var: " + temp);
 			if (temp>=0.5){
 				return true
 			} else return false;
-		} 
-		else if (x==="char"){
+		} else if (x==="char"){
 			var temp = Math.random();
 			if (user.attributes.charisma!=0){
 				temp += user.attributes.charisma * 0.25;
 			}
-			console.log("charisma var: " + temp);
+			console.log("(" + user.username + ") charisma var: " + temp);
 			if (temp>=0.5){
 				return true
 			} else return false;
+		} else if (x==="duel"){
+			var temp = Math.round(((Math.random()+1) + target.attributes.luck) + globalfortune);
+			var temp2 = temp + batpoints;
+			console.log("(" + target.username + ") fortune points: " + temp2);
+			return temp2;
 		} else {
 			// for adding variables in battle
 			// spirits; berzerk; 
 			var temp = Math.round(((Math.random()+1) + user.attributes.luck) + globalfortune);
 			var temp2 = temp + batpoints;
-			console.log("fortune points: " + temp2);
+			console.log("(" + user.username + ") fortune points: " + temp2);
 			return temp2;
 		}
 	}, 
@@ -163,6 +205,14 @@ module.exports = {
 			return monthday
 		}
 	},
+  
+  hasmagic: function(x){
+	    for (i=0;i<user.items.magic.length;i++){
+        if (user.items.magic[i].searchname.includes(x)) {
+	         	 return true
+	      }
+	    }
+	},
 
 	ifmagic: function(){
 	    if (user.items.magic.length===0){
@@ -182,50 +232,68 @@ module.exports = {
 	        for (i=0;i<user.items.magic.length;i++){
 	            returnvar += "   " + user.items.magic[i].name + ": " + user.items.magic[i].desc + "\n";
 	        }
-	    returnvar += "\n";
+	    returnvar += " \n";
 	    return returnvar
 	},
 
 	status: function(){
     return ("Your current status: \n```Hitpoints: " + user.hp + "   Level: " + user.level.name + "\n" +
-        "Gold: " + user.gold + "        Experience: " + user.xp + "\n" +
+        "Gold: " + user.gold + "       Experience: " + user.xp + "\n" +
         "Weapon: " + user.items.weapon.name + "   Armor: " + user.items.armor.name + "\n" +
         "Magicks: " + utility.ifmagic() + "\n" +
         "Attributes: Charisma (" + user.attributes.charisma + ") Mysticism (" + user.attributes.myst + ") Luck (" + user.attributes.luck + ") Strength (" + user.attributes.strength + ")\n" + 
-        "Battle turns remaining today: " + user.turnsToday + "```");
+        "Battle turns remaining today: " + user.turnsToday + "\n" +
+        "Mission: " + user.missionname + "```");
 	},
 
 	eventbus: function(x){
 		var temp = "";
 		if (sessionevents.major.length>0){
 	        for (i=0;i<sessionevents.major.length;i++){
-	        	var temp2 = sessionevents.major[i];
-	        	temp += events.eventReturner(temp2);
+	        	var majoreventstemp = sessionevents.major[i];
+	        	temp += events.eventReturner(majoreventstemp);
 	        }
-			sessionevents.tobesaved += temp;
+			// sessionevents.tobesaved.push(temp); 
 		}
 		if (sessionevents.minor.length>0){
 			if (sessionevents.minor.length===1){
-				console.log("eventbus just 1 event");
+				console.log("(" + user.username + ") eventbus just 1 event");
 				// pick up event 
-				var temp2 = sessionevents.minor[0];
+				var minoreventstemp = sessionevents.minor[0];
 				// pick up event description
-		        temp += events.eventReturner(temp2);
+		        temp += events.eventReturner(minoreventstemp);
 			} else {
-				console.log("eventbus >1 event");
+				console.log("(" + user.username + ") eventbus >1 event");
 				// pick a minor event at random
-				var temp2 = Math.round(Math.random() * (sessionevents.minor.length-1) );
+				var minoreventsvar = Math.round(Math.random() * (sessionevents.minor.length-1) );
 				// pick up event
-				var temp3 = sessionevents.minor[temp2]
-		        temp += events.eventReturner(temp3);
+				var minoreventstemp = sessionevents.minor[minoreventsvar];
+		        temp += events.eventReturner(minoreventstemp);
 			}
 		}
-		sessionevents.tobesaved += temp;
-		console.log("sessionevents.tobesaved: " + sessionevents.tobesaved);
+		console.log("temp: " + temp + " (eventbus)");
+		// sessionevents.tobesaved += temp;
+		console.log("(" + user.username + ") sessionevents.tobesaved: " + sessionevents.tobesaved);
 		eventsave();
+	},
+
+	confirmsameitem: function(x){
+		if (x==="mag"){
+			if (user.items.magic.length===0) return false;
+			else {
+				for (i=0;i<user.items.magic.length;i++){
+		            if (user.items.magic[i].name===currentmerch.name) {return true}
+		            else return false;
+		        }
+		    }
+		}
+	},
+
+	findgems: function(x){
+		if (user.items.rubies === 0) return false
+		else return true;
 	}
 		// town, tavern, smither, smithbuy, apot, bank, abbey, farm, asking
 		// lev2, magic, newplayer, death
 }
-
 

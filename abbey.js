@@ -11,7 +11,7 @@ module.exports = {
 			town.townsquare(res,convo);
 		} else if (user.xp >=102 && user.level.level<2){
 			if (user.mission==="abbey" && missioncomplete){
-				// post-mission/level up
+				// post-mission/level up to level 2
 				utility.levelup(2);
 				user.gold += 200;
 				user.xp += 50;
@@ -32,13 +32,19 @@ module.exports = {
 					convo.next();
 				});
 			}
-		} else if (user.level.level>=2){
-			// beyond level 1
+		} else if (user.level.level>=2 && user.level.level<5){
+			// beyond level 2 but before level 5
 			convo.say("The Abbey's new oak double doors gleam in the afternoon light. The new altar at the front is spit polished and gives a warm, inviting glow. The old Cleric, resplendent in soft robes, greets you with a smile. \n>Welcome again, child. What brings you back to our humble house?");
 			convo.ask("You may inquire about The `Faith`, `rest` and reflect in the nave, ask the Cleric to `heal` you, or turn and `return` to town.", function(res,convo){
 					abbeyrouter(res,convo);
 					convo.next();
 				});
+		} else if (user.level.level===5){
+			// level five - Dark Abbey
+
+		} else if (user.level.level>=6){
+			// beyond level six (Dark Abbey mission)
+
 		}
 	}
 
@@ -91,7 +97,8 @@ abbey1 = function(res,convo){
 	if (temp.includes('accept')){
 		convo.say("The old Cleric's face brightens and he claps his hands with quiet gratitude. \n>Truly, the Great Father sent you to us! Thank you, my child! With your formidable skills and the Great Father's guiding hand, how can you not succeed? \n\n>All I know is that the thieves fled into the *Dark Woods*. They were last seen by a farmer heading east. Be vigilant - they are armed, and do not likely fear meeting the Great Father in the world beyond!");
 		convo.say("*You have accepted the Cleric's mission!* \nFilled with newfound purpose, you turn to leave the Abbey.\n\n");
-		user.mission = "abbey"
+		user.mission = "abbey";
+    user.missionname = "Thieves from the Abbey";
 		town.townsquare(res,convo);
 	} else if (temp.includes('decline')) {
 		convo.say("The old Cleric's face falls in disappointment. \n>Well... perhaps another time, then. Go with the Father, child.\n He stands up and goes back to sweeping the floor.");
@@ -188,3 +195,13 @@ abbeyheal = function(res,convo,x){
 	}
 }
 
+////////////////////////////////////////////////////////////
+//
+// LEVEL 5 MISSION STUFF
+//
+////////////////////////////////////////////////////////////
+
+
+darkabbey = function(res,convo){
+
+}

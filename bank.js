@@ -90,7 +90,6 @@ bdeposit = function(res,convo){
 bwithdraw = function(res,convo){
 	var temp = res.text;
 	temp = Number(temp);
-	console.log("temp type: " + typeof(temp));
 	if (isNaN(temp)){
 		convo.say("The teller narrows his eyes. \n>Are you okay, sir?");
 		convo.ask("What next? (Want a `reminder`?)", function(res,convo){
@@ -114,4 +113,5 @@ bwithdraw = function(res,convo){
         });
 	}
 }
+
 

@@ -140,6 +140,7 @@ smithmerchconfirm = function(res,convo,x){
             convo.next();
         });
 	} else if (temp.includes("confirm")) {
+		sessionevents.minor.push["smithbuy"];
 		user.gold -= currentmerch.gold;
 		if (x===2){
 			console.log("pre - armor name: " + user.items.armor.name);
@@ -161,24 +162,24 @@ smithmerchconfirm = function(res,convo,x){
 }	
 
 weaps = function(){
-	var temp = "`1` - " + items.weapons.club.name + " (" + items.weapons.club.gold + " Gold\n`2` - " + items.weapons.sclub.name + " (" + items.weapons.sclub.gold + " Gold\n`3` - " + items.weapons.fsword.name +" (" + items.weapons.fsword.gold + " Gold";
+	var temp = "`1` - " + items.weapons.club.name + " (" + items.weapons.club.gold + " Gold)\n`2` - " + items.weapons.sclub.name + " (" + items.weapons.sclub.gold + " Gold)\n`3` - " + items.weapons.fsword.name +" (" + items.weapons.fsword.gold + " Gold)";
 	if (user.level.level>=2){
-		temp += "\n`4` - "+ items.weapons.mace.name +" (" + items.weapons.mace.gold + " Gold";
+		temp += "\n`4` - "+ items.weapons.mace.name +" (" + items.weapons.mace.gold + " Gold)";
 	}
 	if (user.level.level>=3){
-		temp += "\n`5` - "+ items.weapons.oldsword.name +" (" + items.weapons.oldsword.gold + " Gold";
+		temp += "\n`5` - "+ items.weapons.oldsword.name +" (" + items.weapons.oldsword.gold + " Gold)";
 	}
 	// horizontal line here?
 	return temp;
 }
 
 arms = function(){
-	var temp = "`1` - " + items.armor.canvas.name + " (" + items.armor.canvas.gold + " Gold\n`2` - " + items.armor.leather.name + " (" + items.armor.leather.gold + " Gold\n`3` - " + items.armor.stud.name +" (" + items.armor.stud.gold + " Gold";
+	var temp = "`1` - " + items.armor.canvas.name + " (" + items.armor.canvas.gold + " Gold)\n`2` - " + items.armor.leather.name + " (" + items.armor.leather.gold + " Gold)\n`3` - " + items.armor.stud.name +" (" + items.armor.stud.gold + " Gold)";
 	if (user.level.level>=2){
-		temp += "\n`4` - "+ items.armor.rivet.name +" (" + items.armor.rivet.gold + " Gold";
+		temp += "\n`4` - "+ items.armor.rivet.name +" (" + items.armor.rivet.gold + " Gold)";
 	}
 	if (user.level.level>=3){
-		temp += "\n`5` - "+ items.armor.steel.name +" (" + items.armor.steel.gold + " Gold";
+		temp += "\n`5` - "+ items.armor.steel.name +" (" + items.armor.steel.gold + " Gold)";
 	}
 	// horizontal line here?
 	return temp;
