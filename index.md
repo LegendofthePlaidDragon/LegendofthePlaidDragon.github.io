@@ -13,3 +13,4 @@ Click here to add to your Slack:
 <h3>Questions/Comments:</h3>
 
 [Twitterwebs](https://twitter.com/blairreeves)
+[Blog](http://blairreeves.me)
