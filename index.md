@@ -1,6 +1,6 @@
 <h1>Welcome to Legend of the Plaid Dragon.</h1>
 
-<b>Smoke emerges from the mountain. Something has awoken. Check back soon.</b>
+<b>Smoke emerges from the mountain. Something has awoken.</b>
 
 <h2>What's this all about?</h2>
 
