@@ -53,6 +53,7 @@ module.exports = function(webserver, controller) {
 
                     res.cookie('team_id', auth.team_id);
                     res.cookie('bot_user_id', auth.bot.bot_user_id);
+                    console.log("Added to a new team!");
                     res.redirect('/login_success.html');
 
                 });

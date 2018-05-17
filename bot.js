@@ -1,65 +1,60 @@
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-           ______     ______     ______   __  __     __     ______
-          /\  == \   /\  __ \   /\__  _\ /\ \/ /    /\ \   /\__  _\
-          \ \  __<   \ \ \/\ \  \/_/\ \/ \ \  _"-.  \ \ \  \/_/\ \/
-           \ \_____\  \ \_____\    \ \_\  \ \_\ \_\  \ \_\    \ \_\
-            \/_____/   \/_____/     \/_/   \/_/\/_/   \/_/     \/_/
+// KEY PLAYER VARIABLES
+
+currentuser = ""; 
+userid = "";
+msg = "";
+username=""; 
+user={};
+shadow={};
+globalfortune=0;
+batpoints=0;
+shieldflag=false;
+swordflag=false;
+gran = true;
+currentmerch = undefined;
+allNames = "";
+stew = false;
+drinkvar=false;
+channel=undefined;
+aturns=0;
+missioncomplete=false;
+hearings="";
+sessionevents={
+    minor:[],
+    majorflag:false,
+    major:[],
+    tobesaved:[]
+};
+today=0;
+qturns=0;
+target=undefined;
 
 
-This is a sample Slack bot built with Botkit.
+  /////////////////
+  // KEY INITS
+  /////////////////
+newuser = require('./lib/user');
+town = require('./town');
+tavern = require('./tavern');
+woods = require('./woods');
+farm = require('./farm');
+bank = require('./bank');
+apot = require('./apot');
+smith = require('./smith');
+abbey = require('./abbey');
+mage = require('./mage');
+royale = require('./royale');
+stalk = require('./stalk');
+items = require('./lib/items');
+levs = require('./lib/levels');
+// events = require('./lib/events');
+utility = require('./utility');
+beasts = require('./lib/beasts');
+spellz = require('./lib/spellz');
 
-This bot demonstrates many of the core features of Botkit:
-
-* Connect to Slack using the real time API
-* Receive messages based on "spoken" patterns
-* Reply to messages
-* Use the conversation system to ask questions
-* Use the built in storage system to store and retrieve information
-  for a user.
-
-# RUN THE BOT:
-
-  Create a new app via the Slack Developer site:
-
-    -> http://api.slack.com
-
-  Get a Botkit Studio token from Botkit.ai:
-
-    -> https://studio.botkit.ai/
-
-  Run your bot from the command line:
-
-    clientId=<MY SLACK TOKEN> clientSecret=<my client secret> PORT=<3000> studio_token=<MY BOTKIT STUDIO TOKEN> node bot.js
-
-# USE THE BOT:
-
-    Navigate to the built-in login page:
-
-    https://<myhost.com>/login
-
-    This will authenticate you with Slack.
-
-    If successful, your bot will come online and greet you.
-
-
-# EXTEND THE BOT:
-
-  Botkit has many features for building cool and useful bots!
-
-  Read all about it here:
-
-    -> http://howdy.ai/botkit
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 var env = require('node-env-file');
 env(__dirname + '/.env');
-
-
-if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-  usage_tip();
-  // process.exit(1);
-}
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
@@ -119,7 +114,7 @@ if (!process.env.clientId || !process.env.clientSecret) {
   })
   // Set up a simple storage backend for keeping a record of customers
   // who sign up for the app via the oauth
-  // require(__dirname + '/components/user_registration.js')(controller);
+  require(__dirname + '/components/user_registration.js')(controller);
 
   // Send an onboarding message when a new team joins
   require(__dirname + '/components/onboarding.js')(controller);
@@ -135,73 +130,14 @@ if (!process.env.clientId || !process.env.clientSecret) {
     require("./skills/" + file)(controller);
   });
 
-  /////////////////
-  // KEY INITS
-  /////////////////
-newuser = require('./lib/user');
-town = require('./town');
-tavern = require('./tavern');
-woods = require('./woods');
-farm = require('./farm');
-bank = require('./bank');
-apot = require('./apot');
-smith = require('./smith');
-abbey = require('./abbey');
-mage = require('./mage');
-royale = require('./royale');
-stalk = require('./stalk');
-items = require('./lib/items');
-levs = require('./lib/levels');
-events = require('./lib/events');
-utility = require('./utility');
-beasts = require('./lib/beasts');
-spellz = require('./lib/spellz');
-
-// KEY PLAYER VARIABLES
-
-currentuser = ""; 
-userid = "";
-msg = "";
-username=""; 
-user={};
-shadow={};
-globalfortune=0;
-batpoints=0;
-shieldflag=false;
-swordflag=false;
-gran = true;
-currentmerch = undefined;
-allNames = "";
-stew = false;
-drinkvar=false;
-channel=undefined;
-aturns=0;
-missioncomplete=false;
-hearings="";
-sessionevents={
-    minor:[],
-    majorflag:false,
-    major:[],
-    tobesaved:[]
-};
-today=0;
-qturns=0;
-target=undefined;
-  
-////////////////
-// END INITS
-////////////////
-  
-  
   // This captures and evaluates any message sent to the bot as a DM
   // or sent to the bot in the form "@bot message" and passes it to
   // Botkit Studio to evaluate for trigger words and patterns.
   // If a trigger is matched, the conversation will automatically fire!
   // You can tie into the execution of the script using the functions
   // controller.studio.before, controller.studio.after and controller.studio.validate
-  if (process.env.studio_token) {
-      controller.on('direct_mention', function(bot, message) {
-          // controller.studio.runTrigger(bot, message.text, message.user, message.channel, message).then(function(convo) {
+
+controller.on('direct_mention', function(bot, message) {
         console.log("direct mention");
         bot.reply(message, "Greetings, fellow wanderer. If you'd like to begin the journey of Dunquest, just direct message me.");
     });
@@ -209,26 +145,15 @@ target=undefined;
     controller.on('mention', function(bot, message) {
         console.log("channel mention");
         bot.reply(message, "Greetings, fellow wanderers. If you'd like to begin the journey of Dunquest, just direct message me.");
-              // if (!convo) {
-              //     // no trigger was matched
-              //     // If you want your bot to respond to every message,
-              //     // define a 'fallback' script in Botkit Studio
-              //     // and uncomment the line below.
-              //     // controller.studio.run(bot, 'fallback', message.user, message.channel);
-              // } else {
-              //     // set variables here that are needed for EVERY script
-              //     // use controller.studio.before('script') to set variables specific to a script
-              //     convo.setVar('current_time', new Date());
-              // }
       });
     
     controller.on('direct_message', function (bot, message) {
 
-    utility.reboot();
-    userid = message.user;
-    user.userid = userid;
-    team = message.team;
-    today = utility.todaysdate();
+      utility.reboot();
+      userid = message.user;
+      user.userid = userid;
+      team = message.team;
+      today = utility.todaysdate();
       console.log("userid: " + userid);
       console.log("team:" + team);
       console.log("today: " + utility.todaysdate());
@@ -282,8 +207,11 @@ target=undefined;
             drinkvar=true;
             // grab some user deets real quick, saves to user var
             bot.api.users.info({'user':user.userid},function(err,res){
-                user.username = res.user.name;
-                console.log("new user username: " + user.username + " (startup)");
+              if (err) console.log("err: " + err);
+              user.username = res.user.real_name;
+              console.log("real_name: " + res.user.real_name);
+              console.log("name: " + res.user.name);
+              console.log("new user username: " + user.username + " (startup)");
             });
         } else {
             // found a record for user
@@ -300,9 +228,8 @@ target=undefined;
 
   });
     
-  }
 }
- 
+
 enter = function(res, convo){
     convo.say("Great! Let's go! 🐲");
     convo.say("You're walking down a dirt path. It's nighttime, and cool out. The crickets are chirping around you. There's a soft light up ahead. As you get a little closer, the yellow light of a small country inn beckons. \n\nYou open the small metal gate and walk into the inn's yard. There are torches about lighting the way, and the sound of voices talking and laughing inside.");
@@ -640,3 +567,4 @@ saverecord = function(tgt){
         console.log("(" + tgt.username + ") saved target record");
     });
 }
+

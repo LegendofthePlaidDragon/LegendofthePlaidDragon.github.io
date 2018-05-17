@@ -314,9 +314,12 @@ findgems = function(){
 }
 
 around = function(res,convo){
-	console.log("(" + user.username + ") names around the bar: " + allNames);
-    convo.say("You see " + allNames + "and others lurking about the bar.");
-    convo.repeat();
+  console.log("(" + user.username + ") names around the bar: " + allNames);
+  convo.say("You see " + allNames + "and others lurking about the bar.");
+  convo.ask("The bar hums quietly around you. What next? (Want a `reminder`?)", function(res,convo){
+    tavernrouter(res,convo);
+    convo.next();
+  });
 }
 
 tavstalk = function(res,convo){
