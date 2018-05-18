@@ -6,7 +6,7 @@
 
 Legend of the Plaid Dragon is a text-based role-playing game for Slack, based loosely on the BBS door game classic [Legend of the Red Dragon](https://en.wikipedia.org/wiki/Legend_of_the_Red_Dragon). Players can develop a character, interact with other characters, pursue mysteries and, of course, slay beasts and level up so they can... slay even **bigger** monsters, and eventually defeat the Plaid Dragon, who terrorizes the mystical village.
 
-<b>This game is still very much in beta.<b> Give me a holler about bugs you encounter - there are plenty of them still out there.
+**This game is still very much in beta.** Give me a holler about bugs you encounter - there are plenty of them still out there.
 
 Click here to add to your Slack:
 
