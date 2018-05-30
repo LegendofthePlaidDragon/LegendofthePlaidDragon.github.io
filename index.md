@@ -16,7 +16,7 @@ Click here to add to your Slack:
 
 The permission scopes for this game are very narrowly drawn, and I don't save anything that I don't absolutely have to in order for the game to work. Specifically, I keep your team ID, Slack user ID and user name.
 
-<h3>Questions/Comments:</h3>
+<h3>Questions/Comments and Feedback:</h3>
 
 [Twitterwebs](https://twitter.com/blairreeves)
 
