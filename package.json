@@ -1,7 +1,7 @@
 {
-  "name": "botkit-starter-slack",
-  "version": "0.0.2",
-  "description": "A starter kit for building a custom Slack bot with Botkit Studio",
+  "name": "Legend of the Plaid Dragon",
+  "version": "1.0.0",
+  "description": "A Slack game inspired by the classic BBS door game Legend of the Red Dragon",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
@@ -23,17 +23,17 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/howdyai/botkit-starter-slack.git"
+    "url": "https://github.com/LegendofthePlaidDragon/LegendofthePlaidDragon.github.io.git"
   },
   "bugs": {
-    "url": "https://github.com/howdyai/botkit-starter-slack/issues"
+    "url": "https://github.com/LegendofthePlaidDragon/LegendofthePlaidDragon.github.io/issues"
   },
-  "homepage": "https://github.com/howdyai/botkit-starter-slack",
+  "homepage": "http://legendoftheplaiddragon.github.io/",
   "keywords": [
     "bots",
-    "chatbots",
-    "slack"
+    "slack",
+    "game"
   ],
-  "author": "ben@howdy.ai",
+  "author": "blair@blairreeves.me",
   "license": "ISC"
 }

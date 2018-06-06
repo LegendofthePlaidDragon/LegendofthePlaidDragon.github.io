@@ -76,7 +76,7 @@ module.exports = {
       missioncomplete=false
       user.mission = "";
       user.missionname="None";
-      console.log("levelup4 fires");
+      console.log("levelup5 fires");
 		} else if (x===6){
 			// Abbey dark mission completed - Level 6
 			user.level = levs.levels.corsair;
@@ -161,7 +161,7 @@ module.exports = {
 				temp += user.attributes.charisma * 0.25;
 			}
 			console.log("(" + user.username + ") charisma var: " + temp);
-			if (temp>=0.5){
+			if (temp>=0.6){
 				return true
 			} else return false;
 		} else if (x==="duel"){
@@ -235,6 +235,15 @@ module.exports = {
 	    returnvar += " \n";
 	    return returnvar
 	},
+  
+  removemagic: function(x){
+    for (i=0;i<user.items.magic.length;i++){
+        if (user.items.magic[i].searchname.includes(x)) {
+	         	 user.items.magic.splice([i],1);
+            // check to be sure this works
+	      }
+	    }
+  },
 
 	status: function(){
     return ("Your current status: \n```Hitpoints: " + user.hp + "   Level: " + user.level.name + "\n" +

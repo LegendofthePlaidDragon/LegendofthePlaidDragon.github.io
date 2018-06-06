@@ -209,8 +209,7 @@ controller.on('direct_mention', function(bot, message) {
             bot.api.users.info({'user':user.userid},function(err,res){
               if (err) console.log("err: " + err);
               user.username = res.user.real_name;
-              console.log("real_name: " + res.user.real_name);
-              console.log("name: " + res.user.name);
+              console.log("name: " + res.user.real_name);
               console.log("new user username: " + user.username + " (startup)");
             });
         } else {
@@ -330,7 +329,7 @@ enter2 = function(res,convo){
     // instructions or town
     var temp = res.text.toLowerCase();
     if (temp==="instructions"){
-        convo.ask("The Innkeeper nods his head. \n>Okay then. You probably lots of questions. What topic would you like explained? Let me pour you some ale, and I'll explain concepts like the `village` of Dunshire, `fighting`, Buying/using `merchandise`, interacting with `townsfolk` or other `wanderers`, `magick` or general `concepts`. Or you can just `continue` on to the Village of Dunshire.\"", function(res, convo){
+        convo.ask("The Innkeeper nods his head. \n>Okay then. You probably have lots of questions. What topic would you like explained? Let me pour you some ale, and I'll explain concepts like the `village` of Dunshire, `fighting`, Buying/using `merchandise`, interacting with `townsfolk` or other `wanderers`, `magick` or general `concepts`. Or you can just `continue` on to the Village of Dunshire.\"", function(res, convo){
             instructions(res,convo);
             convo.next();
         });
@@ -352,14 +351,14 @@ enter2 = function(res,convo){
 instructions = function(res,convo){
     var temp = res.text.toLowerCase();
     if (temp.includes('village')){
-        convo.say(">The Village of Dunshire is a peaceful place - mostly. There are several small merchants in town for you to meet, as well as places to explore. As you become more experienced, you will discover some that you hadn't noticed at first. The Village is surrounded by the Dark Woods. The Woods are inhabited by a fearsome variety of beasts - from the [insert beast name] to the [other beast name] and many more. You will need to acquire better weapons, armor and more to defeat them all as time goes on. \nThere are other towns beyond the Dark Woods, of course. But you needn't worry about them for now.\n");
-        convo.ask("What can I answer next? (Want a `reminder`?)", function(res,convo){
+        convo.say(">The Village of Dunshire is a peaceful place - mostly. There are several small merchants in town for you to meet, as well as places to explore. As you become more experienced, you will discover some that you hadn't noticed at first. The Village is surrounded by the Dark Woods. The Woods are inhabited by a fearsome variety of beasts - from the Highwayman to the Juggernaut and many more. You will need to acquire better weapons, armor and more to defeat them all as time goes on. \nThere are other towns beyond the Dark Woods, of course. But you needn't worry about them for now.\n");
+        convo.ask("What can I answer next? (Need help or want a `reminder`?)", function(res,convo){
             instructions(res,convo);
             convo.next();
         });
     } else if (temp.includes('fighting')) {
         convo.say(">As you make your way through the Village, the Dark Woods and elsewhere, you may be called upon to defend yourself. Fighting - whether it be with beasts in the Dark Woods or anywhere else - is straightforward. If you are lucky and/or skilled, you may have an opportunity to make the first strike - or not. You may be able to run away in the middle of a battle if your health runs low (but there's no guarantee you'll succeed). You cannot use your extra gear in the middle of a battle - doing so would require dropping your guard! Defeating opponents will earn you gold and experience. The more formidable the opponent, the more gold and experience. You may run around the Dark Woods slaying as many squirrels as you like, but it will not make you rich.\n");
-        convo.ask("What can I answer next? (Want a `reminder`?)", function(res,convo){
+        convo.ask("What can I answer next? (Need help or want a `reminder`?)", function(res,convo){
             instructions(res,convo);
             convo.next();
         });
@@ -446,7 +445,7 @@ death = function(res,convo){
     }
     quicksave();
     // utility.eventbus();
-    convo.say("When you come to, you are back at the country inn outside of town. Everything is a bit hazy. \nYou go inside. The Innkeeper is still there, and as he sees you stagger in, he beckons you over and helps you down on to a bench. Your muscles ache. Your head throbs. \n>Looks like you had a bad encounter with that forest beast! No shame in that, *" + user.username + "*. It's happened to all of us. You'll be back in the action tomorrow. For now, sit a spell. Have a drink. \nHe plops a tankard of frothy ale down in front of you, and the pounding in your head begins to subside. You decide to get comfortable.");
+    convo.say("When you come to, you are back at the country inn outside of town. Everything is a bit hazy. \nYou go inside. The Innkeeper is still there, and as he sees you stagger in, he beckons you over and helps you down on to a bench. Your muscles ache. Your head throbs. \n>Looks like you had a bad encounter out there! No shame in that, *" + user.username + "*. It's happened to all of us. You'll be back in the action tomorrow. For now, sit a spell. Have a drink. \nHe plops a tankard of frothy ale down in front of you, and the pounding in your head begins to subside. You decide to get comfortable.");
     convo.say("Better luck tomorrow. *See you soon, fellow wanderer.*");
     convo.next();
 }

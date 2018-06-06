@@ -16,10 +16,12 @@ stalktopmenu = function(res,convo){
   var temp = res.text.toLowerCase();
 	if (temp.includes("attack")){
     if (user.attributes.luck >= target.attributes.luck){
+      target.hp = target.level.maxhp;
       playerturn(res,convo);
       convo.next();
     } else {
       convo.say("Zounds! *" + target.username + "* is more alert than you thought! As you approach, their eyes snap wide open, and before you are ready, they spring into action!");
+      target.hp = target.level.maxhp;
       oppturn(res,convo);
       convo.next();
     }
@@ -29,7 +31,10 @@ stalktopmenu = function(res,convo){
     convo.next();
   } else {
 		convo.say("Come again?");
-		convo.repeat();
+		convo.ask("You can `attack` *" + target.username + "* in their sleep, or `slink` back into the darkness and return to the light of town.", function(res,convo){
+      stalktopmenu(res,convo);
+      convo.next();
+    });
 	}
 }
 
@@ -113,7 +118,10 @@ duelfightrouter = function(res,convo){
   } else if (temp.includes("magick")){
     if (user.items.magic.length===0){
 			convo.say("You have no knowledge of magicks yet!");
-			convo.repeat();
+			convo.ask("Do you `attack`, attempt to `run` away, or invoke `magick`?", function(res,convo){
+        duelfightrouter(res,convo);
+        convo.next();
+      });
 		} else {
 			var temp = utility.showmagic();
 			convo.say(temp);
@@ -124,7 +132,10 @@ duelfightrouter = function(res,convo){
     }
   } else {
 		convo.say("Come again?");
-		convo.repeat();
+		convo.ask("Do you `attack`, attempt to `run` away, or invoke `magick`?", function(res,convo){
+      duelfightrouter(res,convo);
+      convo.next();
+    });
 	}
 }
 
@@ -204,8 +215,10 @@ var temp = res.text.toLowerCase();
 			});
   } else if (user.turnsToday<=spellz.clap.turnsreq) {
 			convo.say("You do not have enough turns left today to invoke this magick.")
-			convo.repeat();
-			// confirm that this goes back to "which magick" question
+			convo.ask("Do you `attack`, attempt to `run` away, or invoke `magick`?", function(res,convo){
+        duelfightrouter(res,convo);
+        convo.next();
+      });
 		} else {
 			attackdamage = spellz.clap.attack - target.items.armor.armor - utility.fortune("duel");
 			console.log("user attack: " + attackdamage);
@@ -281,7 +294,10 @@ var temp = res.text.toLowerCase();
 	// } else if (temp.includes("sword")){
 		// we don't have this level yet
 	} else {
-		convo.repeat();
+		convo.ask("Do you `attack`, attempt to `run` away, or invoke `magick`?", function(res,convo){
+      duelfightrouter(res,convo);
+      convo.next();
+    });
 	}
 }
 

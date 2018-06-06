@@ -21,8 +21,8 @@ module.exports = function(controller) {
               if (err) {
                 console.log(err);
               } else {
-                convo.say('I am a bot that has just joined your team');
-                convo.say('You must now /invite me to a channel so that I can be of use!');
+                convo.say('The Legend of the Plaid Dragon has now been enabled for your Slack workspace!');
+                convo.say('You may /invite me to a channel, or simply send a Direct Message to begin your journey.');
               }
             });
         }

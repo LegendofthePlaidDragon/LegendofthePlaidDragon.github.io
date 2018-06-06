@@ -4,6 +4,7 @@ var drinks = require('./lib/drinks');
 var barlines = require('./lib/barlines');
 stew = false, minst = false, list="";
 tempdrinkobject = {};
+tempusername = "";
 
 module.exports = {
 
@@ -259,7 +260,10 @@ minstrelrouter = function(res,convo){
 				convo.say("Your spirit feels refreshed.");
 			} 
 			minst = true;
-			convo.repeat();
+			convo.ask("The bar hums quietly around you. What next? (Want a `reminder`?)", function(res,convo){
+        tavernrouter(res,convo);
+        convo.next();
+      });
 		} else {
 			// minst is true
 			convo.say("The Minstrel has already played for you today, and now entertains other tavern patrons.");
@@ -330,7 +334,7 @@ tavstalk = function(res,convo){
 }
 
 tavstalkrouter = function(res,convo){
-	var temp = res.text.toLowerCase();
+	var temp = res.text;
 	if (temp===user.username){
 		convo.say("Dean furrows his brow. \n>You tryin' to make a damn fool of me? You're standing right there!");
 		convo.ask("The bar hums quietly around you. What next? (Want a `reminder`?)", function(res,convo){
@@ -363,6 +367,7 @@ tavstalkrouter = function(res,convo){
 				">If you _really_ want to know, I might try to remember... \n" +
         "He taps his finger softly on the bar.");
 		  convo.ask("`Slide` a 25 gold piece across the bar, or decide to `change` the subject.", function(res,convo){
+        tempusername = temp;
         tavstalk2(res,convo);
         convo.next();
       });
@@ -375,7 +380,10 @@ tavstalkrouter = function(res,convo){
     });
 	} else {
 		convo.say("Come again?");
-		convo.repeat();
+		convo.ask("Which fellow wanderer do you wish to stalk: " + allNames + "or `none` of these?", function(res,convo){
+      tavstalkrouter(res,convo);
+      convo.next();
+    });
 	}
 }
 
@@ -395,16 +403,17 @@ tavstalk2 = function(res,convo){
     } else {
       convo.say("You slide 25 gold pieces across the bar, and Dean quickly slides them off into his apron.");
       convo.say("Looking around to be sure he's not overheard, Dean leans in close to you again. \n" +
-        "I heard that *" + temp + "* is camping just outside of town tonight. Not far from the Graveyard. But... you never heard that from me.")
+        "I heard that *" + tempusername + "* is camping just outside of town tonight. Not far from the Graveyard. But... you never heard that from me.")
       user.gold -= 25;
+      getrecord(tempusername);
+      // target is now a full user object
       convo.ask("You can thank Dean and discreetly `sneak` out of the back door, or just decide to forget it and `return` to your swill.", function(res,convo){
-        //target=getrecord(temp);
-        // target is now a full user object
         tavstalk2(res,convo);
         convo.next();
       });
     }
   } else if (temp.includes("change") || temp.includes("return")){
+    target = undefined;
     convo.say("Dean shrugs and returns to polishing the glasses. \n" +
       ">Suit yourself, then.");
     convo.ask("What next? (Want a `reminder`?)", function(res,convo){
@@ -443,7 +452,7 @@ send = function(res,convo){
 }
 
 sendrouter = function(res,convo){
-	var temp = res.text.toLowerCase();
+	var temp = res.text;
 	if (temp.includes("none") || temp===user.username ) {
 		convo.say("Dean looks at you, confused. \nStrange one, I see...");
 		convo.ask("The bar hums quietly around you. What next? (Want a `reminder`?)", function(res,convo){
@@ -571,8 +580,10 @@ pickup2 = function(res,convo){
 			        convo.next();
 				});
 			} else {
-				convo.ask("Whose drink was that? Try the name again, or `none` to change your mind.");
-				convo.repeat();
+				convo.ask("Whose drink shall you quaff first? (Or `none` of them?)", function(res,convo){
+          pickup2(res,convo);
+          convo.next();
+	      });
 			}
 		}
 	}

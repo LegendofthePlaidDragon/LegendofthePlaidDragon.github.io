@@ -12,7 +12,7 @@ townsquare: function(res, convo){
     convo.say("*During the night, you were attacked in your sleep!* As you slept in the fields, *" + user.duel.new[0].opp + "* tracked you down and attacked without warning!");
     if (user.duel.new[0].result==="L"){
       convo.say("*" + user.duel.new[0].opp + "* was too much for you, and cut you down in combat. They made off with half of your gold, and were heard gloating afterwards at the Tavern...");
-    } else if (user.duel.new[0].result==="D"){ 
+    } else if (user.duel.new[0].result==="W"){ 
       convo.say("*" + user.duel.new[0].opp + "* underestimated your fortitude, however, and you repelled their cowardly attack! You gained gold and experience, as well as bragging rights at the Tavern...");
     } else if (user.duel.new[0].result==="R"){
       convo.say("*" + user.duel.new[0].opp + "* was not prepared for your furious counterattack, and they ran off to escape the fight! Just like a coward.");
@@ -85,7 +85,7 @@ woods = function(x){
 
 townstatus = function(res,convo){
 	convo.say(utility.status());
-	convo.ask("The town square bustles around you. What next? (Want a `reminder`?)", function(res,convo){
+	convo.ask("The town square bustles around you. What next? (Need help or want a `reminder`?)", function(res,convo){
 	    townrouter(res,convo);
 	    convo.next();
 	});
@@ -95,7 +95,7 @@ towngear = function(res,convo){
 	var temp = utility.showgear();
 	if (temp === 0){
 		convo.say("You have no items!");
-		convo.ask("The town square bustles around you. What next? (Want a `reminder`?)", function(res,convo){
+		convo.ask("The town square bustles around you. What next? (Need help or want a `reminder`?)", function(res,convo){
 		    townrouter(res,convo);
 		    convo.next();
 		});
@@ -111,7 +111,7 @@ towngear = function(res,convo){
 townusegear = function(res,convo){
 	var temp = res.text.toLowerCase();
 	if (temp.includes('none')){
-		convo.ask("The town square bustles around you. What next? (Want a `reminder`?)", function(res,convo){
+		convo.ask("The town square bustles around you. What next? (Need help or want a `reminder`?)", function(res,convo){
 		    townrouter(res,convo);
 		    convo.next();
 		});
@@ -129,7 +129,7 @@ townusegear = function(res,convo){
 		} else {
 			var temp3 = utility.items(temp2[0].name);
 			convo.say(temp3);
-			convo.ask("The town square bustles around you. What next? (Want a `reminder`?)", function(res,convo){
+			convo.ask("The town square bustles around you. What next? (Need help or want a `reminder`?)", function(res,convo){
 			    townrouter(res,convo);
 			    convo.next();
 			});
@@ -139,7 +139,7 @@ townusegear = function(res,convo){
 
 crier = function(res,convo){
     convo.say(hearings);
-    convo.ask("The town square bustles around you. What next? (Want a `reminder`?)", function(res,convo){
+    convo.ask("The town square bustles around you. What next? (Need help or want a `reminder`?)", function(res,convo){
 	    townrouter(res,convo);
 	    convo.next();
 	});
