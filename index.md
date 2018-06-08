@@ -23,3 +23,5 @@ The permission scopes for this game are very narrowly drawn, and I don't save an
 [Twitterwebs](https://twitter.com/blairreeves)
 
 [Blog](http://blairreeves.me)
+
+[Email](mailto:blair@blairreeves.me)
